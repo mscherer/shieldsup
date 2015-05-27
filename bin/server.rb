@@ -100,6 +100,10 @@ def connect_to_db
 end
 
 
+def clean_db
+	m = connect_to_db
+	m.query("DELETE from jobs WHERE updated < DATE_SUB(now(), INTERVAL 5 MINUTE)")
+end
 
 # check for db entry/status
 # return: row or false if not found
@@ -508,6 +512,12 @@ def main
 	end
 
 	server = UNIXServer.new(socket_file)
+
+	# clean the DB
+	Thread.new do
+		clean_db
+		sleep 60
+	end
 
 	while true
 		client = server.accept
